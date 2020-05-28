@@ -75,7 +75,7 @@ public final class FlatFile {
         }
 
         @SneakyThrows
-        private <V> V extract(int length, Class<V> clazz) {
+        private <U> U extract(int length, Class<U> clazz) {
             return clazz.getConstructor(String.class)
                     .newInstance(StringUtils.trimToNull(
                             StringUtils.substring(
