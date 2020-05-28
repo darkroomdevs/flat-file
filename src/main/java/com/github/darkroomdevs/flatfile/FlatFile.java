@@ -98,7 +98,7 @@ public final class FlatFile {
             this.cursor = 0;
         }
 
-        void forwardCursor(int length) {
+        private void forwardCursor(int length) {
             this.cursor += length;
         }
 
