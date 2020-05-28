@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FlatFileTest {
 
@@ -23,16 +24,29 @@ class FlatFileTest {
         // @formatter:off
         Map<String, Object> map =
                 FlatFile.parser(row)
-                        .field(15, "name")
-                        .field(2, "number", Integer.class)
-                        .field(15, "team")
-                    .build()
-                        .asMap();
+                    .field(15, "name")
+                    .field(2, "number", Integer.class)
+                    .field(15, "team")
+                .build()
+                    .asMap();
         // @formatter:on
 
         assertThat(map).hasSize(3);
         assertThat(map).extractingByKey("name").isEqualTo("AYRTON SENNA");
         assertThat(map).extractingByKey("number").isEqualTo(1);
         assertThat(map).extractingByKey("team").isEqualTo("Lotus Team");
+    }
+
+    @Test
+    public void assertThatParserFailWithoutConverter() {
+        assertThatThrownBy(() -> {
+            // @formatter:off
+            //noinspection ResultOfMethodCallIgnored
+            FlatFile.parser(row)
+                .field(1, "initial", Character.class)
+            .build()
+                .asMap();
+            // @formatter:on
+        }).isInstanceOf(java.lang.NoSuchMethodException.class);
     }
 }
