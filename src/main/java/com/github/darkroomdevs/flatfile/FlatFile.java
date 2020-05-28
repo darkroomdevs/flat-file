@@ -19,7 +19,7 @@ public final class FlatFile {
     }
 
     public static FlatFileParser<String> parser(String row) {
-        return new FlatFileParserString(row);
+        return new FlatFileParserBuilder<>(row);
     }
 
     public interface FlatFileParser<T> {
@@ -31,26 +31,26 @@ public final class FlatFile {
         FlatFile build();
     }
 
-    private static class FlatFileParserString implements FlatFileParser<String> {
+    private static class FlatFileParserBuilder<T> implements FlatFileParser<T> {
 
         private final Map<String, Object> values;
         private final String row;
 
         private int offset;
 
-        public FlatFileParserString(String row) {
-            this.row = row;
+        public FlatFileParserBuilder(T row) {
+            this.row = row.toString();
             this.values = new HashMap<>();
             this.offset = 0;
         }
 
         @Override
-        public FlatFileParserString field(int length, String name) {
+        public FlatFileParserBuilder<T> field(int length, String name) {
             return field(length, name, String.class);
         }
 
         @Override
-        public <T> FlatFileParserString field(int length, String name, Class<T> clazz) {
+        public <U> FlatFileParserBuilder<T> field(int length, String name, Class<U> clazz) {
             values.put(name, extract(length, clazz));
             offset += length;
             return this;
@@ -62,7 +62,7 @@ public final class FlatFile {
         }
 
         @SneakyThrows
-        private <T> T extract(int length, Class<T> clazz) {
+        private <V> V extract(int length, Class<V> clazz) {
             return clazz.getConstructor(String.class)
                     .newInstance(StringUtils.trimToNull(
                             StringUtils.substring(row, offset, offset + length)));
