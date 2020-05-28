@@ -24,9 +24,16 @@ class FlatFileTest {
         // @formatter:off
         Map<String, Object> map =
                 FlatFile.parser(row)
-                    .field(15, "name")
-                    .field(2, "number", Integer.class)
-                    .field(15, "team")
+                    .field("name")
+                        .length(15)
+                    .add()
+                    .field("number")
+                        .length(2)
+                        .type(Integer.class)
+                    .add()
+                    .field("team")
+                        .length(15)
+                    .add()
                 .build()
                     .asMap();
         // @formatter:on
@@ -43,7 +50,9 @@ class FlatFileTest {
             // @formatter:off
             //noinspection ResultOfMethodCallIgnored
             FlatFile.parser(row)
-                .field(1, "initial", Character.class)
+                .field("initial")
+                    .type(Character.class)
+                .add()
             .build()
                 .asMap();
             // @formatter:on
