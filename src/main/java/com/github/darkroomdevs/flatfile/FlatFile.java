@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class FlatFile {
 
+    private static final String SET_METHOD_PREFIX = "set";
+
     private final Map<String, Object> values;
 
     private FlatFile(Map<String, Object> values) {
@@ -16,6 +18,21 @@ public final class FlatFile {
 
     public Map<String, Object> asMap() {
         return values;
+    }
+
+    @SneakyThrows
+    public <T> T asObject(Class<T> clazz) {
+        final T object = clazz.getConstructor().newInstance();
+        values.forEach((key, value) -> {
+            try {
+                clazz.getDeclaredMethod(
+                        SET_METHOD_PREFIX.concat(StringUtils.capitalize(key)), value.getClass())
+                        .invoke(object, value);
+            } catch (Exception e) {
+                /* Do nothing! */
+            }
+        });
+        return object;
     }
 
     public static FlatFileParser<String> parser(String row) {

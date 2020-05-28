@@ -1,7 +1,9 @@
 package com.github.darkroomdevs.flatfile;
 
+import java.io.Serializable;
 import java.util.Map;
 
+import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +22,7 @@ class FlatFileTest {
     }
 
     @Test
-    public void assertThatParserExtractSuccessful() {
+    public void assertThatParserExtractAsMap() {
         // @formatter:off
         Map<String, Object> map =
                 FlatFile.parser(row)
@@ -45,6 +47,31 @@ class FlatFileTest {
     }
 
     @Test
+    public void assertThatParserExtractAsObject() {
+        // @formatter:off
+        DataExample dataExample =
+                FlatFile.parser(row)
+                    .field("name")
+                        .length(15)
+                    .add()
+                    .field("number")
+                        .length(2)
+                        .type(Integer.class)
+                    .add()
+                    .field("team")
+                        .length(15)
+                    .add()
+                .build()
+                    .asObject(DataExample.class);
+        // @formatter:on
+
+        assertThat(dataExample).isNotNull();
+        assertThat(dataExample).hasFieldOrPropertyWithValue("name", "AYRTON SENNA");
+        assertThat(dataExample).hasFieldOrPropertyWithValue("number", 1);
+        assertThat(dataExample).hasFieldOrPropertyWithValue("country", null);
+    }
+
+    @Test
     public void assertThatParserFailWithoutConverter() {
         assertThatThrownBy(() -> {
             // @formatter:off
@@ -57,5 +84,33 @@ class FlatFileTest {
                 .asMap();
             // @formatter:on
         }).isInstanceOf(java.lang.NoSuchMethodException.class);
+    }
+
+    @Test
+    public void assertThatReturnFailWithoutConstructor() {
+        assertThatThrownBy(() -> {
+            // @formatter:off
+            FlatFile.parser(row)
+                .field("description")
+                    .length(15)
+                .add()
+            .build()
+                .asObject(ErrorExample.class);
+            // @formatter:on
+        }).isInstanceOf(java.lang.NoSuchMethodException.class);
+    }
+
+    @Data
+    private static class DataExample implements Serializable {
+
+        private String name;
+        private Integer number;
+        private String country;
+    }
+
+    @Data
+    private static class ErrorExample implements Serializable {
+
+        private final String description;
     }
 }
