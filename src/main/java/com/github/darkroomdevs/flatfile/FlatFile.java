@@ -50,6 +50,14 @@ public final class FlatFile {
 
         FlatFileField<T> length(int length);
 
+        FlatFileField<T> withoutPad();
+
+        FlatFileField<T> pad(char padChar);
+
+        FlatFileField<T> leftPad(char padChar);
+
+        FlatFileField<T> rightPad(char padChar);
+
         <U> FlatFileField<T> type(Class<U> clazz);
 
         FlatFileParser<T> add();
@@ -64,17 +72,46 @@ public final class FlatFile {
         private int length;
         private Class<?> clazz;
 
+        private String padChar;
+        private String padCharFromLeft;
+        private String padCharFromRight;
+
         public FlatFileFieldBuilder(String name, final Map<String, Object> values, final FlatFileParser<T> flatFileParser) {
             this.name = name;
             this.values = values;
             this.flatFileParser = (FlatFileParserBuilder<T>) flatFileParser;
             this.length = 1;
             this.clazz = String.class;
+            this.padChar = StringUtils.SPACE;
         }
 
         @Override
         public FlatFileField<T> length(int length) {
             this.length = length;
+            return this;
+        }
+
+        @Override
+        public FlatFileField<T> pad(char padChar) {
+            this.padChar = Character.toString(padChar);
+            return this;
+        }
+
+        @Override
+        public FlatFileField<T> withoutPad() {
+            this.padChar = null;
+            return this;
+        }
+
+        @Override
+        public FlatFileField<T> leftPad(char padChar) {
+            this.padCharFromLeft = Character.toString(padChar);
+            return this;
+        }
+
+        @Override
+        public FlatFileField<T> rightPad(char padChar) {
+            this.padCharFromRight = Character.toString(padChar);
             return this;
         }
 
@@ -94,11 +131,22 @@ public final class FlatFile {
         @SneakyThrows
         private <U> U extract(int length, Class<U> clazz) {
             return clazz.getConstructor(String.class)
-                    .newInstance(StringUtils.trimToNull(
+                    .newInstance(strip(
                             StringUtils.substring(
                                     flatFileParser.row,
                                     flatFileParser.cursor,
                                     flatFileParser.cursor + length)));
+        }
+
+        private String strip(String value) {
+            String processing = StringUtils.defaultIfBlank(value, null);
+            if (padCharFromLeft == null && padCharFromRight == null && padChar != null) {
+                processing = StringUtils.strip(processing, padChar);
+            } else {
+                if (padCharFromLeft != null) processing = StringUtils.stripStart(processing, padCharFromLeft);
+                if (padCharFromRight != null) processing = StringUtils.stripEnd(processing, padCharFromRight);
+            }
+            return processing;
         }
     }
 

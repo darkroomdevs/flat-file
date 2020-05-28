@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class FlatFileTest {
 
     private static final String ROW_UNDER_TEST = "AYRTON SENNA   1 Lotus Team     ";
+    private static final String SPECIAL_PADDED_ROW_UNDER_TEST = "+AYRTON SENNA--X1_Lotus Team____";
 
     private String row;
 
@@ -42,6 +43,63 @@ class FlatFileTest {
 
         assertThat(map).hasSize(3);
         assertThat(map).extractingByKey("name").isEqualTo("AYRTON SENNA");
+        assertThat(map).extractingByKey("number").isEqualTo(1);
+        assertThat(map).extractingByKey("team").isEqualTo("Lotus Team");
+    }
+
+    @Test
+    public void assertThatParserExtractPaddedAsMap() {
+        row = SPECIAL_PADDED_ROW_UNDER_TEST;
+
+        // @formatter:off
+        Map<String, Object> map =
+                FlatFile.parser(row)
+                    .field("name")
+                        .length(15)
+                        .leftPad('+')
+                        .rightPad('-')
+                    .add()
+                    .field("number")
+                        .length(2)
+                        .type(Integer.class)
+                        .leftPad('X')
+                    .add()
+                        .field("team")
+                        .length(15)
+                        .pad('_')
+                    .add()
+                .build()
+                    .asMap();
+        // @formatter:on
+
+        assertThat(map).hasSize(3);
+        assertThat(map).extractingByKey("name").isEqualTo("AYRTON SENNA");
+        assertThat(map).extractingByKey("number").isEqualTo(1);
+        assertThat(map).extractingByKey("team").isEqualTo("Lotus Team");
+    }
+
+    @Test
+    public void assertThatParserExtractWithoutStripAsMap() {
+        // @formatter:off
+        Map<String, Object> map =
+                FlatFile.parser(row)
+                    .field("name")
+                        .length(15)
+                        .withoutPad()
+                    .add()
+                    .field("number")
+                        .length(2)
+                        .type(Integer.class)
+                    .add()
+                    .field("team")
+                        .length(15)
+                    .add()
+                .build()
+                    .asMap();
+        // @formatter:on
+
+        assertThat(map).hasSize(3);
+        assertThat(map).extractingByKey("name").isEqualTo("AYRTON SENNA   ");
         assertThat(map).extractingByKey("number").isEqualTo(1);
         assertThat(map).extractingByKey("team").isEqualTo("Lotus Team");
     }
