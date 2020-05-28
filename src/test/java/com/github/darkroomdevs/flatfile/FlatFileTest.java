@@ -159,6 +159,24 @@ class FlatFileTest {
     }
 
     @Test
+    public void assertThatParserExtractWithConverter() {
+        // @formatter:off
+        Map<String, Object> map =
+                FlatFile.parser(row)
+                    .field("initial")
+                        .length(1)
+                        .type(Character.class)
+                        .withConverter(value -> value.charAt(0))
+                    .add()
+                .build()
+                    .asMap();
+        // @formatter:on
+
+        assertThat(map).hasSize(1);
+        assertThat(map).extractingByKey("initial").isEqualTo('A');
+    }
+
+    @Test
     public void assertThatParserFailWithoutConverter() {
         assertThatThrownBy(() -> {
             // @formatter:off

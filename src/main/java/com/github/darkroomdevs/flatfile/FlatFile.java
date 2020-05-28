@@ -62,7 +62,14 @@ public final class FlatFile {
 
         <U> FlatFileField<T> type(Class<U> clazz);
 
+        <U> FlatFileField<T> withConverter(FlatFileFieldConverter<U> converter);
+
         FlatFileParser<T> add();
+    }
+
+    public interface FlatFileFieldConverter<T> {
+
+        T toObject(String value);
     }
 
     private static class FlatFileFieldBuilder<T> implements FlatFileField<T> {
@@ -74,6 +81,7 @@ public final class FlatFile {
 
         private int length;
         private Class<?> clazz;
+        private FlatFileFieldConverter<?> converter;
 
         private String padChar;
         private String padCharFromLeft;
@@ -127,6 +135,12 @@ public final class FlatFile {
         }
 
         @Override
+        public <U> FlatFileField<T> withConverter(FlatFileFieldConverter<U> converter) {
+            this.converter = converter;
+            return this;
+        }
+
+        @Override
         public FlatFileParser<T> add() {
             values.put(name, extract(length, clazz));
             flatFileParser.forwardCursor(freeze ? 0 : length);
@@ -135,12 +149,13 @@ public final class FlatFile {
 
         @SneakyThrows
         private <U> U extract(int length, Class<U> clazz) {
-            return clazz.getConstructor(String.class)
-                    .newInstance(strip(
-                            StringUtils.substring(
-                                    flatFileParser.row,
-                                    flatFileParser.cursor,
-                                    flatFileParser.cursor + length)));
+            String value = strip(
+                    StringUtils.substring(
+                            flatFileParser.row,
+                            flatFileParser.cursor,
+                            flatFileParser.cursor + length));
+            if (converter != null) return clazz.cast(converter.toObject(value));
+            return clazz.getConstructor(String.class).newInstance(value);
         }
 
         private String strip(String value) {
