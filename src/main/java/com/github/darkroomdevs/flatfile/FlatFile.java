@@ -50,6 +50,8 @@ public final class FlatFile {
 
         FlatFileField<T> length(int length);
 
+        FlatFileField<T> freeze(int length);
+
         FlatFileField<T> withoutPad();
 
         FlatFileField<T> pad(char padChar);
@@ -70,6 +72,7 @@ public final class FlatFile {
         private final FlatFileParserBuilder<T> flatFileParser;
 
         private int length;
+        private boolean freeze;
         private Class<?> clazz;
 
         private String padChar;
@@ -88,6 +91,13 @@ public final class FlatFile {
         @Override
         public FlatFileField<T> length(int length) {
             this.length = length;
+            return this;
+        }
+
+        @Override
+        public FlatFileField<T> freeze(int length) {
+            this.length = length;
+            this.freeze = true;
             return this;
         }
 
@@ -124,7 +134,7 @@ public final class FlatFile {
         @Override
         public FlatFileParser<T> add() {
             values.put(name, extract(length, clazz));
-            flatFileParser.forwardCursor(length);
+            flatFileParser.forwardCursor(freeze ? 0 : length);
             return flatFileParser;
         }
 

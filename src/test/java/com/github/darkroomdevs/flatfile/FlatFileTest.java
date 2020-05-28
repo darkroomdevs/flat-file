@@ -105,6 +105,35 @@ class FlatFileTest {
     }
 
     @Test
+    public void assertThatParserExtractWithoutFowardAsMap() {
+        // @formatter:off
+        Map<String, Object> map =
+                FlatFile.parser(row)
+                    .field("initial")
+                        .freeze(1)
+                    .add()
+                    .field("name")
+                        .length(15)
+                    .add()
+                    .field("number")
+                        .length(2)
+                        .type(Integer.class)
+                    .add()
+                    .field("team")
+                        .length(15)
+                    .add()
+                .build()
+                    .asMap();
+        // @formatter:on
+
+        assertThat(map).hasSize(4);
+        assertThat(map).extractingByKey("initial").isEqualTo("A");
+        assertThat(map).extractingByKey("name").isEqualTo("AYRTON SENNA");
+        assertThat(map).extractingByKey("number").isEqualTo(1);
+        assertThat(map).extractingByKey("team").isEqualTo("Lotus Team");
+    }
+
+    @Test
     public void assertThatParserExtractAsObject() {
         // @formatter:off
         DataExample dataExample =
