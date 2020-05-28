@@ -43,14 +43,14 @@ public final class FlatFile {
 
         FlatFileField<T> field(String name);
 
+        FlatFileField<T> alias(String name);
+
         FlatFile build();
     }
 
     public interface FlatFileField<T> {
 
         FlatFileField<T> length(int length);
-
-        FlatFileField<T> freeze(int length);
 
         FlatFileField<T> withoutPad();
 
@@ -68,19 +68,21 @@ public final class FlatFile {
     private static class FlatFileFieldBuilder<T> implements FlatFileField<T> {
 
         private final String name;
+        private final boolean freeze;
         private final Map<String, Object> values;
         private final FlatFileParserBuilder<T> flatFileParser;
 
         private int length;
-        private boolean freeze;
         private Class<?> clazz;
 
         private String padChar;
         private String padCharFromLeft;
         private String padCharFromRight;
 
-        public FlatFileFieldBuilder(String name, final Map<String, Object> values, final FlatFileParser<T> flatFileParser) {
+        public FlatFileFieldBuilder(String name, boolean freeze,
+                final Map<String, Object> values, final FlatFileParser<T> flatFileParser) {
             this.name = name;
+            this.freeze = freeze;
             this.values = values;
             this.flatFileParser = (FlatFileParserBuilder<T>) flatFileParser;
             this.length = 1;
@@ -91,13 +93,6 @@ public final class FlatFile {
         @Override
         public FlatFileField<T> length(int length) {
             this.length = length;
-            return this;
-        }
-
-        @Override
-        public FlatFileField<T> freeze(int length) {
-            this.length = length;
-            this.freeze = true;
             return this;
         }
 
@@ -179,7 +174,12 @@ public final class FlatFile {
 
         @Override
         public FlatFileField<T> field(String name) {
-            return new FlatFileFieldBuilder<>(name, values, this);
+            return new FlatFileFieldBuilder<>(name, false, values, this);
+        }
+
+        @Override
+        public FlatFileField<T> alias(String name) {
+            return new FlatFileFieldBuilder<>(name, true, values, this);
         }
 
         @Override

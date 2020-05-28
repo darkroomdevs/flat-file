@@ -109,8 +109,8 @@ class FlatFileTest {
         // @formatter:off
         Map<String, Object> map =
                 FlatFile.parser(row)
-                    .field("initial")
-                        .freeze(1)
+                    .alias("initial")
+                        .length(1)
                     .add()
                     .field("name")
                         .length(15)
