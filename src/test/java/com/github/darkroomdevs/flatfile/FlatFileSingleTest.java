@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class FlatFileTest {
+class FlatFileSingleTest {
 
     private static final String ROW_UNDER_TEST = "AYRTON SENNA   1 Lotus Team     ";
     private static final String SPECIAL_PADDED_ROW_UNDER_TEST = "+AYRTON SENNA--X1_Lotus Team____";
@@ -180,7 +180,6 @@ class FlatFileTest {
     public void assertThatParserFailWithoutConverter() {
         assertThatThrownBy(() -> {
             // @formatter:off
-            //noinspection ResultOfMethodCallIgnored
             FlatFile.parser(row)
                 .field("initial")
                     .type(Character.class)
