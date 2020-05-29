@@ -13,6 +13,10 @@ public final class FlatFile {
 
     private static final String SET_METHOD_PREFIX = "set";
 
+    private static final Class<List<Object>> objectListType = new GenericType<List<Object>>() {
+        /* EMPTY CLASS */
+    }.getClazz();
+
     private final Map<String, List<Object>> values;
 
     private FlatFile(Map<String, List<Object>> values) {
@@ -174,10 +178,7 @@ public final class FlatFile {
 
         @Override
         public FlatFileParser<T> add() {
-            Class<List<Object>> listType = new GenericType<List<Object>>() {
-                /* EMPTY CLASS */
-            }.getClazz();
-            values.put(name, listType.cast(extract(length, clazz)));
+            values.put(name, objectListType.cast(extract(length, clazz)));
             flatFileParser.forwardCursor(freeze ? 0 : length);
             return flatFileParser;
         }
