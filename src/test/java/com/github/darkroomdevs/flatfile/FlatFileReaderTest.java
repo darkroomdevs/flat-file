@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FlatFileReaderTest {
 
@@ -123,5 +124,12 @@ class FlatFileReaderTest {
         // @formatter:on
 
         assertThat(list).isEmpty();
+    }
+
+    @Test
+    public void assertThatReaderFailWhenFileNotExist() {
+        assertThatThrownBy(() -> {
+            FlatFileReader.read(new File("test.txt")).asStringParser();
+        }).isInstanceOf(java.nio.file.NoSuchFileException.class);
     }
 }
