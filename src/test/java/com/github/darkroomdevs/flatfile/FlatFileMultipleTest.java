@@ -92,11 +92,36 @@ class FlatFileMultipleTest {
         assertThat(list).extracting("team").containsOnly("Lotus Team", "McLaren");
     }
 
+    @Test
+    public void assertThatParserExtractAsObjectList() {
+        // @formatter:off
+        List<DataExample> list =
+                FlatFile.parser(rows)
+                    .field("name")
+                        .length(15)
+                    .add()
+                    .field("number")
+                        .length(2)
+                        .type(Integer.class)
+                    .add()
+                    .field("team")
+                        .length(15)
+                    .add()
+                .build()
+                    .asObjectList(DataExample.class);
+        // @formatter:on
+
+        assertThat(list).hasSize(2);
+        assertThat(list).extracting("name").containsOnly("AYRTON SENNA", "NELSON PIQUET");
+        assertThat(list).extracting("number").containsOnly(1, 2);
+        assertThat(list).extracting("team").containsOnly("Lotus Team", "McLaren");
+    }
+
     @Data
     private static class DataExample implements Serializable {
 
         private String name;
         private Integer number;
-        private String country;
+        private String team;
     }
 }

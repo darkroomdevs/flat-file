@@ -49,22 +49,33 @@ public final class FlatFile {
     }
 
     @SneakyThrows
+    private <T> T newInstance(Map<String, Object> mapValues, Class<T> clazz) {
+        final T object = clazz.getConstructor().newInstance();
+        mapValues.forEach((key, value) -> {
+            try {
+                clazz.getDeclaredMethod(
+                        SET_METHOD_PREFIX.concat(StringUtils.capitalize(key)), value.getClass())
+                        .invoke(object, value);
+            } catch (Exception e) {
+                /* Do nothing! */
+            }
+        });
+        return object;
+    }
+
     public <T> T asObject(Class<T> clazz) {
         Map<String, Object> mapValues = asMap();
         if (mapValues != null) {
-            final T object = clazz.getConstructor().newInstance();
-            mapValues.forEach((key, value) -> {
-                try {
-                    clazz.getDeclaredMethod(
-                            SET_METHOD_PREFIX.concat(StringUtils.capitalize(key)), value.getClass())
-                            .invoke(object, value);
-                } catch (Exception e) {
-                    /* Do nothing! */
-                }
-            });
-            return object;
+            return newInstance(mapValues, clazz);
         }
         return null;
+    }
+
+    public <T> List<T> asObjectList(Class<T> clazz) {
+        final List<T> listObjects = new ArrayList<>();
+        List<Map<String, Object>> listValues = asList();
+        listValues.forEach(mapValues -> listObjects.add(newInstance(mapValues, clazz)));
+        return listObjects;
     }
 
     public static FlatFileParser<String> parser(String row) {
