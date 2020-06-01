@@ -128,8 +128,7 @@ class FlatFileReaderTest {
 
     @Test
     public void assertThatReaderFailWhenFileNotExist() {
-        assertThatThrownBy(() -> {
-            FlatFileReader.read(new File("test.txt")).asStringParser();
-        }).isInstanceOf(java.nio.file.NoSuchFileException.class);
+        assertThatThrownBy(() -> FlatFileReader.read(new File("test.txt")).asStringParser())
+                .isInstanceOf(java.nio.file.NoSuchFileException.class);
     }
 }
