@@ -114,6 +114,7 @@ public final class FlatFile {
         FlatFileParser<T> add();
     }
 
+    @FunctionalInterface
     public interface FlatFileFieldConverter<T> {
 
         T toObject(String value);

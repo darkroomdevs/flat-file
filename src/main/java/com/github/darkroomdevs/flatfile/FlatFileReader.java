@@ -39,8 +39,8 @@ public final class FlatFileReader {
     @SneakyThrows
     private List<String> loadFile() {
         List<String> rows = Files.readAllLines(file.toPath());
-        if (ignoreFirst) rows.remove(0);
-        if (ignoreLast) rows.remove(rows.size() - 1);
+        if (ignoreFirst && !rows.isEmpty()) rows.remove(0);
+        if (ignoreLast && !rows.isEmpty()) rows.remove(rows.size() - 1);
         return rows;
     }
 }
