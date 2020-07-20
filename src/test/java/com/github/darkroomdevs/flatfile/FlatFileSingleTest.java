@@ -134,6 +134,35 @@ class FlatFileSingleTest {
     }
 
     @Test
+    public void assertThatParserExtractWithSkipAsMap() {
+        // @formatter:off
+        Map<String, Object> map =
+                FlatFile.parser(row)
+                    .alias("initial")
+                        .length(1)
+                    .add()
+                    .field("name")
+                        .length(15)
+                    .skip()
+                    .field("number")
+                        .length(2)
+                        .type(Integer.class)
+                    .add()
+                    .field("team")
+                        .length(15)
+                    .add()
+                .build()
+                    .asMap();
+        // @formatter:on
+
+        assertThat(map).hasSize(3);
+        assertThat(map).extractingByKey("initial").isEqualTo("A");
+        assertThat(map).extractingByKey("name").isNull();
+        assertThat(map).extractingByKey("number").isEqualTo(1);
+        assertThat(map).extractingByKey("team").isEqualTo("Lotus Team");
+    }
+
+    @Test
     public void assertThatParserExtractAsObject() {
         // @formatter:off
         DataExample dataExample =

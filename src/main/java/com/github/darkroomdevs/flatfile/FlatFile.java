@@ -112,6 +112,8 @@ public final class FlatFile {
         <U> FlatFileField<T> withConverter(FlatFileFieldConverter<U> converter);
 
         FlatFileParser<T> add();
+
+        FlatFileParser<T> skip();
     }
 
     @FunctionalInterface
@@ -192,6 +194,12 @@ public final class FlatFile {
         public FlatFileParser<T> add() {
             values.put(name, objectListType.cast(extract(length, clazz)));
             flatFileParser.forwardCursor(freeze ? 0 : length);
+            return flatFileParser;
+        }
+
+        @Override
+        public FlatFileParser<T> skip() {
+            flatFileParser.forwardCursor(length);
             return flatFileParser;
         }
 
